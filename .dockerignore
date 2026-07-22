@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+.env
+.env.*
+.npmrc
+.vite
+server/uploads/*
+!server/uploads/.gitkeep

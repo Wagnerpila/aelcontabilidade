@@ -30,6 +30,10 @@ dist-ssr
 .env
 .vite
 
+# Específico desta máquina Windows (contorna o "&" no nome da pasta ao
+# rodar "npm run"/"npx" via cmd.exe) — não deve ir para o build/deploy.
+.npmrc
+
 # Arquivos enviados pelos usuários (guardados fora do controle de versão)
 server/uploads/*
 !server/uploads/.gitkeep

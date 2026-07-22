@@ -2,9 +2,13 @@
 FROM node:20-alpine AS build
 RUN apk add --no-cache openssl
 WORKDIR /app
+# Força a instalação das devDependencies (vite, plugins de build, etc.)
+# mesmo que o ambiente de build injete NODE_ENV=production — sem isso o
+# "npm ci" pula as devDependencies e o "npm run build" falha por falta do vite.
+ENV NODE_ENV=development
 COPY package*.json ./
 COPY prisma ./prisma
-RUN npm ci
+RUN npm ci --include=dev
 COPY . .
 RUN npm run build
 
