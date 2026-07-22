@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String   @id @default(cuid())
+  email              String   @unique
+  password_hash      String
+  full_name          String
+  role               String   @default("user")
+  plan               String   @default("free")
+  companyName        String?
+  companyIconUrl     String?
+  empresa_id         String?
+  empresa_solicitada String?
+  empresa_status     String   @default("pendente")
+  created_date       DateTime @default(now())
+  updated_date       DateTime @updatedAt
+  created_by         String?
+}
+
+model Cliente {
+  id                String   @id @default(cuid())
+  user_id           String
+  nome              String
+  cpf_cnpj          String
+  email             String?
+  telefone          String?
+  preferencia_envio String   @default("email")
+  ativo             Boolean  @default(true)
+  created_date      DateTime @default(now())
+  updated_date      DateTime @updatedAt
+  created_by        String?
+
+  @@index([user_id])
+}
+
+model Documento {
+  id                   String   @id @default(cuid())
+  user_id              String
+  cliente_id           String?
+  nome_cliente         String
+  tipo_documento       String
+  data_documento       String?
+  arquivo_url          String?
+  nome_arquivo         String?
+  status_leitura       Boolean  @default(false)
+  status_identificacao Boolean  @default(false)
+  status_organizacao   Boolean  @default(false)
+  status_email         Boolean  @default(false)
+  status_whatsapp      Boolean  @default(false)
+  caminho_pasta        String?
+  observacoes          String?
+  created_date         DateTime @default(now())
+  updated_date         DateTime @updatedAt
+  created_by           String?
+
+  @@index([user_id])
+  @@index([cliente_id])
+}
+
+model Empresa {
+  id                     String   @id @default(cuid())
+  nome                   String
+  cnpj                   String?
+  email_contato          String?
+  logo_url               String?
+  plano                  String   @default("free")
+  ativa                  Boolean  @default(true)
+  n8n_webhook_documentos String?
+  n8n_webhook_mensagens  String?
+  n8n_ativo              Boolean  @default(false)
+  created_date           DateTime @default(now())
+  updated_date           DateTime @updatedAt
+  created_by             String?
+}
+
+model GerenciamentoEnvio {
+  id                      String   @id @default(cuid())
+  user_id                 String
+  cliente_id              String
+  nome_cliente            String?
+  mes_referencia          String
+  documentos_enviados     Json     @default("[]")
+  documentos_nao_enviados Json     @default("[]")
+  dctfweb_pendente        Boolean  @default(false)
+  observacoes             String?
+  created_date            DateTime @default(now())
+  updated_date            DateTime @updatedAt
+  created_by              String?
+
+  @@index([user_id])
+  @@index([cliente_id])
+}
+
+model NotificationTemplate {
+  id           String   @id @default(cuid())
+  name         String
+  type         String
+  subject      String?
+  body         String
+  created_date DateTime @default(now())
+  updated_date DateTime @updatedAt
+  created_by   String?
+}
+
+model SystemConfig {
+  id           String   @id @default(cuid())
+  config_key   String
+  config_value String
+  config_type  String
+  description  String?
+  is_active    Boolean  @default(true)
+  created_date DateTime @default(now())
+  updated_date DateTime @updatedAt
+  created_by   String?
+}

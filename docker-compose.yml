@@ -1,0 +1,18 @@
+# Apenas para desenvolvimento local: sobe um Postgres para testar o backend
+# sem precisar instalar o banco na máquina. Em produção (EasyPanel), use o
+# serviço de Postgres do próprio EasyPanel — este arquivo não é usado lá.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: al_contabilidade
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:

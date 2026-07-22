@@ -1,0 +1,52 @@
+{
+  "name": "Empresa",
+  "type": "object",
+  "properties": {
+    "nome": {
+      "type": "string",
+      "description": "Nome da empresa"
+    },
+    "cnpj": {
+      "type": "string",
+      "description": "CNPJ da empresa"
+    },
+    "email_contato": {
+      "type": "string",
+      "description": "Email de contato da empresa"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "URL do logo da empresa"
+    },
+    "plano": {
+      "type": "string",
+      "enum": [
+        "free",
+        "pro"
+      ],
+      "default": "free",
+      "description": "Plano da empresa"
+    },
+    "ativa": {
+      "type": "boolean",
+      "default": true,
+      "description": "Se a empresa est\u00e1 ativa"
+    },
+    "n8n_webhook_documentos": {
+      "type": "string",
+      "description": "URL do webhook n8n para documentos"
+    },
+    "n8n_webhook_mensagens": {
+      "type": "string",
+      "description": "URL do webhook n8n para mensagens personalizadas"
+    },
+    "n8n_ativo": {
+      "type": "boolean",
+      "default": false,
+      "description": "Se o n8n est\u00e1 ativo para esta empresa"
+    }
+  },
+  "required": [
+    "nome"
+  ]
+}

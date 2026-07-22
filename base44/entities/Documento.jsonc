@@ -1,0 +1,95 @@
+{
+  "name": "Documento",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID do usu\u00e1rio dono deste documento"
+    },
+    "cliente_id": {
+      "type": "string",
+      "description": "ID do cliente vinculado"
+    },
+    "nome_cliente": {
+      "type": "string",
+      "description": "Nome do cliente extra\u00eddo do documento"
+    },
+    "tipo_documento": {
+      "type": "string",
+      "enum": [
+        "CND ESTADUAL",
+        "CND FEDERAL",
+        "CNE MUNICIPAL",
+        "CND TRABALHISTA",
+        "COFINS",
+        "CSLL",
+        "DAS",
+        "FGTS",
+        "INSS",
+        "IRPJ",
+        "Nota Fiscal",
+        "Holerite",
+        "CNPJ",
+        "MEI",
+        "PARCELAMENTO MEI",
+        "PARCELAMENTO SIMPLES",
+        "PIS",
+        "RECIBO DE PAGAMENTO",
+        "RELAT\u00d3RIO DO CART\u00c3O PONTO",
+        "Outros"
+      ],
+      "description": "Tipo do documento identificado"
+    },
+    "data_documento": {
+      "type": "string",
+      "format": "date",
+      "description": "Data extra\u00edda do documento (vencimento para impostos, compet\u00eancia para holerites, per\u00edodo final para relat\u00f3rios)"
+    },
+    "arquivo_url": {
+      "type": "string",
+      "description": "URL do arquivo processado"
+    },
+    "nome_arquivo": {
+      "type": "string",
+      "description": "Nome original do arquivo"
+    },
+    "status_leitura": {
+      "type": "boolean",
+      "default": false,
+      "description": "Arquivo foi lido com sucesso"
+    },
+    "status_identificacao": {
+      "type": "boolean",
+      "default": false,
+      "description": "Documento foi identificado"
+    },
+    "status_organizacao": {
+      "type": "boolean",
+      "default": false,
+      "description": "Arquivo foi organizado"
+    },
+    "status_email": {
+      "type": "boolean",
+      "default": false,
+      "description": "E-mail foi enviado"
+    },
+    "status_whatsapp": {
+      "type": "boolean",
+      "default": false,
+      "description": "WhatsApp foi enviado"
+    },
+    "caminho_pasta": {
+      "type": "string",
+      "description": "Caminho da pasta onde foi salvo"
+    },
+    "observacoes": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es sobre o processamento"
+    }
+  },
+  "required": [
+    "user_id",
+    "nome_cliente",
+    "tipo_documento"
+  ]
+}

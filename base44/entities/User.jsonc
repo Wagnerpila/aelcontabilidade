@@ -1,0 +1,54 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": [
+        "admin",
+        "user"
+      ],
+      "default": "user"
+    },
+    "plan": {
+      "type": "string",
+      "enum": [
+        "free",
+        "pro"
+      ],
+      "default": "free"
+    },
+    "companyName": {
+      "type": "string",
+      "description": "Nome da empresa do usu\u00e1rio"
+    },
+    "companyIconUrl": {
+      "type": "string",
+      "description": "URL do \u00edcone da empresa"
+    },
+    "empresa_id": {
+      "type": "string",
+      "description": "ID da empresa (tenant) a qual este usu\u00e1rio pertence"
+    },
+    "empresa_solicitada": {
+      "type": "string",
+      "description": "Nome da empresa solicitada ao cadastrar (pendente de aprova\u00e7\u00e3o do admin)"
+    },
+    "empresa_status": {
+      "type": "string",
+      "enum": [
+        "pendente",
+        "aprovado",
+        "rejeitado"
+      ],
+      "default": "pendente",
+      "description": "Status da associa\u00e7\u00e3o com empresa"
+    }
+  },
+  "required": [
+    "companyName",
+    "companyIconUrl",
+    "empresa_id",
+    "empresa_solicitada"
+  ]
+}

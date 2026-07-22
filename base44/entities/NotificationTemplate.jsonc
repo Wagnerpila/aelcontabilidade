@@ -1,0 +1,31 @@
+{
+  "name": "NotificationTemplate",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Nome do template (ex: Boas-vindas, Documento DAS Processado)"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "email",
+        "whatsapp"
+      ],
+      "description": "Tipo de notifica\u00e7\u00e3o"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Assunto do e-mail"
+    },
+    "body": {
+      "type": "string",
+      "description": "Corpo da mensagem com vari\u00e1veis (ex: {{nome_cliente}})"
+    }
+  },
+  "required": [
+    "name",
+    "type",
+    "body"
+  ]
+}

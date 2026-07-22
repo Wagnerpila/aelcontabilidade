@@ -1,0 +1,50 @@
+{
+  "name": "GerenciamentoEnvio",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID do usu\u00e1rio dono"
+    },
+    "cliente_id": {
+      "type": "string",
+      "description": "ID do cliente"
+    },
+    "nome_cliente": {
+      "type": "string",
+      "description": "Nome do cliente"
+    },
+    "mes_referencia": {
+      "type": "string",
+      "description": "M\u00eas de refer\u00eancia no formato YYYY-MM"
+    },
+    "documentos_enviados": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Lista de tipos de documentos que foram enviados"
+    },
+    "documentos_nao_enviados": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Lista de tipos de documentos marcados manualmente como n\u00e3o enviados"
+    },
+    "dctfweb_pendente": {
+      "type": "boolean",
+      "default": false,
+      "description": "Empresa com DCTFweb pendente (nenhum documento enviado)"
+    },
+    "observacoes": {
+      "type": "string",
+      "description": "Observa\u00e7\u00f5es sobre o gerenciamento"
+    }
+  },
+  "required": [
+    "user_id",
+    "cliente_id",
+    "mes_referencia"
+  ]
+}
