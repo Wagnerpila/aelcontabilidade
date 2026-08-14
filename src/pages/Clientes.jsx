@@ -178,9 +178,9 @@ export default function ClientesPage() {
   };
 
   const filteredClientes = clientes.filter(cliente =>
-    cliente.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cliente.cpf_cnpj.includes(searchTerm) ||
-    cliente.email.toLowerCase().includes(searchTerm.toLowerCase())
+    (cliente.nome || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (cliente.cpf_cnpj || '').includes(searchTerm) ||
+    (cliente.email || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (isLoading && !currentUser) { // Show loading state until currentUser is determined
