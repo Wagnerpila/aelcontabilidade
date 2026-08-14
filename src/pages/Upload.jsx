@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Documento } from "@/entities/Documento";
 import { Cliente } from "@/entities/Cliente";
-import { SystemConfig } from "@/entities/SystemConfig";
+import { Empresa } from "@/entities/Empresa";
 import { User } from "@/entities/User";
 import { UploadFile, ExtractDataFromUploadedFile, InvokeLLM } from "@/integrations/Core";
 import { Button } from "@/components/ui/button";
@@ -170,21 +170,34 @@ export default function UploadPage() {
 
   // Função para enviar notificação consolidada por cliente
   const sendConsolidatedNotifications = async (documentosPorCliente) => {
-    const systemConfigs = await SystemConfig.filter({ config_type: "n8n" });
-    const n8nWebhookConfig = systemConfigs.find(c => c.config_key === "n8n_webhook_url");
-    const n8nActiveConfig = systemConfigs.find(c => c.config_key === "n8n_active");
-    const isN8nActive = n8nActiveConfig?.config_value === "true";
-    const n8nWebhookUrl = n8nWebhookConfig?.config_value;
+    // Config do n8n mora na Empresa vinculada ao usuário — mesma fonte usada
+    // pela tela Configurações > n8n (N8nConfig.jsx). Antes esta função lia de
+    // SystemConfig, um resquício da versão antiga que nunca era preenchido,
+    // fazendo o envio real sair em silêncio sem nunca chamar o webhook.
+    let empresa = null;
+    try {
+      if (currentUser.empresa_id) {
+        empresa = await Empresa.get(currentUser.empresa_id);
+      } else if (currentUser.role === 'admin') {
+        const empresas = await Empresa.list();
+        if (empresas.length > 0) empresa = empresas[0];
+      }
+    } catch (error) {
+      console.error('❌ Erro ao carregar configuração da empresa:', error);
+    }
+
+    const isN8nActive = !!empresa?.n8n_ativo;
+    const n8nWebhookUrl = empresa?.n8n_webhook_documentos;
 
     if (!isN8nActive) {
-      console.log('⚠️ n8n está desativado nas configurações do sistema.');
-      return;
+      console.log('⚠️ n8n está desativado nas configurações da empresa.');
+      return { enviados: 0, erros: 0, motivo: 'Envio automático via n8n está desativado. Ative em Configurações → n8n.' };
     }
 
     if (!n8nWebhookUrl) {
       console.log('⚠️ URL do webhook n8n não configurada.');
       alert('⚠️ URL do webhook n8n não está configurada. Configure em Configurações → n8n');
-      return;
+      return { enviados: 0, erros: 0, motivo: 'URL do webhook não configurada.' };
     }
 
     // Validar URL do webhook
@@ -193,13 +206,16 @@ export default function UploadPage() {
       if (!url.protocol.startsWith('http')) {
         console.error('❌ URL do webhook inválida. Deve começar com http:// ou https://');
         alert('⚠️ URL do webhook n8n está inválida. Configure em Configurações → n8n');
-        return;
+        return { enviados: 0, erros: 0, motivo: 'URL do webhook inválida.' };
       }
     } catch (e) {
       console.error('❌ URL do webhook malformada:', n8nWebhookUrl, e);
       alert('⚠️ URL do webhook n8n está malformada. Verifique em Configurações → n8n');
-      return;
+      return { enviados: 0, erros: 0, motivo: 'URL do webhook malformada.' };
     }
+
+    let totalEnviados = 0;
+    let totalErros = 0;
 
     // ═══════════════════════════════════════════════════════════════════
     // IMPORTANTE: Processar clientes em FILA SEQUENCIAL (um de cada vez)
@@ -313,10 +329,12 @@ _Processamento Inteligente de Documentos_`;
             };
 
             const result = await sendToWebhook(n8nWebhookUrl, payload, `Documento único para ${cliente.nome}`);
-            
+
             if (result.success) {
               await Documento.update(doc.id, { status_whatsapp: true });
+              totalEnviados++;
             } else {
+              totalErros++;
               alert(`⚠️ Erro ao enviar WhatsApp para ${cliente.nome}:\n\n${result.error}\n\nVerifique as configurações do n8n.`);
             }
           }
@@ -380,8 +398,9 @@ _Processamento Inteligente de Documentos_`;
             };
 
             const resultInicial = await sendToWebhook(n8nWebhookUrl, payloadInicial, `Mensagem inicial para ${cliente.nome}`);
-            
+
             if (!resultInicial.success) {
+              totalErros++;
               alert(`⚠️ Erro ao enviar mensagem inicial para ${cliente.nome}:\n\n${resultInicial.error}\n\nOs documentos NÃO serão enviados. Verifique as configurações do n8n.`);
               // Pular para o próximo cliente se a mensagem inicial falhou
               if (clienteIndex < clientesArray.length - 1) {
@@ -389,8 +408,9 @@ _Processamento Inteligente de Documentos_`;
                 console.log(`⏳ Aguardando 5s antes de processar próximo cliente (${proximoCliente})...`);
                 await sleep(5000);
               }
-              continue; 
+              continue;
             }
+            totalEnviados++;
 
             // Aguardar 3 segundos antes de começar a enviar arquivos
             await sleep(3000);
@@ -452,7 +472,9 @@ _Processamento Inteligente de Documentos_`;
               
               if (resultDoc.success) {
                 await Documento.update(doc.id, { status_whatsapp: true });
+                totalEnviados++;
               } else {
+                totalErros++;
                 console.error(`❌ Falha ao enviar documento ${numeroDocumento} para ${cliente.nome}: ${resultDoc.error}`);
               }
 
@@ -483,6 +505,7 @@ _Processamento Inteligente de Documentos_`;
     }
 
     console.log(`\n🎉 FILA COMPLETA! Todos os ${totalClientes} clientes foram processados.`);
+    return { enviados: totalEnviados, erros: totalErros };
   };
 
   const processSingleFile = async (file, file_url) => {
@@ -710,8 +733,15 @@ _Processamento Inteligente de Documentos_`;
     }
 
     console.log('🧪 Testando webhook com documentos processados...');
-    await sendConsolidatedNotifications(processedDocuments);
-    alert('✅ Webhook testado! Verifique o console e o WhatsApp.');
+    const resultado = await sendConsolidatedNotifications(processedDocuments);
+
+    if (resultado?.motivo) {
+      alert(`⚠️ Nada foi enviado: ${resultado.motivo}`);
+    } else if (resultado?.enviados > 0) {
+      alert(`✅ Webhook testado! ${resultado.enviados} mensagem(ns) enviada(s) com sucesso. Verifique o WhatsApp.`);
+    } else {
+      alert('⚠️ Nenhuma mensagem foi enviada. Verifique o console para detalhes.');
+    }
   };
   
   const handleFileSelect = (selectedFiles) => {
